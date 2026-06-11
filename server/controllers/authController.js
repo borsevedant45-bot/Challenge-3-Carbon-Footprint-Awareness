@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import { sendTokenResponse } from '../utils/jwtHelper.js';
 import { errorResponse, successResponse } from '../utils/responseFormatter.js';

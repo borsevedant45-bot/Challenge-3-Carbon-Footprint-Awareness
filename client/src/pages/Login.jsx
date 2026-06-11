@@ -1,5 +1,6 @@
 import React, { Suspense, useState, lazy } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Leaf, Mail, Lock, AlertCircle, ArrowRight, Sparkles } from 'lucide-react';
 
