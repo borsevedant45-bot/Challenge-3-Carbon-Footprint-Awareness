@@ -9,9 +9,11 @@ const prisma = new PrismaClient();
 // Register User
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
+  // Normalize email to lowercase for case-insensitive uniqueness
+  const normalizedEmail = email ? email.toLowerCase().trim() : email;
 
   try {
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existingUser) {
       return errorResponse(res, 'A user with this email already exists', 400);
     }
@@ -22,14 +24,14 @@ export const register = async (req, res) => {
     const user = await prisma.user.create({
       data: {
         name,
-        email,
+        email: normalizedEmail,
         passwordHash,
         provider: 'local',
         baselineScore: 0
       }
     });
 
-    return sendTokenResponse(user, 210, res); // 201 Created
+    return sendTokenResponse(user, 201, res);
   } catch (error) {
     console.error('Registration Error:', error);
     return errorResponse(res, 'Server error during registration', 500);
@@ -39,10 +41,18 @@ export const register = async (req, res) => {
 // Login User
 export const login = async (req, res) => {
   const { email, password } = req.body;
+  // Normalize email to lowercase for case-insensitive matching
+  const normalizedEmail = email ? email.toLowerCase().trim() : email;
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || user.provider !== 'local') {
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (!user) {
+      return errorResponse(res, 'Invalid credentials', 401);
+    }
+    if (user.provider !== 'local') {
+      return errorResponse(res, 'Please sign in with Google', 401);
+    }
+    if (!user.passwordHash) {
       return errorResponse(res, 'Invalid credentials', 401);
     }
 
@@ -107,9 +117,10 @@ export const forgotPassword = async (req, res) => {
   if (!email) {
     return errorResponse(res, 'Email is required', 400);
   }
+  const normalizedEmail = email.toLowerCase().trim();
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (!user) {
       return errorResponse(res, 'No user registered with this email', 404);
     }
@@ -117,7 +128,7 @@ export const forgotPassword = async (req, res) => {
     // In a real application, we would email a token
     // For MVP, we'll return a simulated link or code
     return successResponse(res, {
-      simulatedResetLink: `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password?email=${encodeURIComponent(email)}`
+      simulatedResetLink: `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password?email=${encodeURIComponent(normalizedEmail)}`
     }, 'Password reset link sent to email (simulated)');
   } catch (error) {
     return errorResponse(res, 'Server error during password reset request', 500);
@@ -127,21 +138,22 @@ export const forgotPassword = async (req, res) => {
 // Google Federated Login (Create or Find User)
 export const googleLogin = async (req, res) => {
   const { email, name, googleId } = req.body;
+  const normalizedEmail = email ? email.toLowerCase().trim() : email;
   
-  if (!email || !name) {
+  if (!normalizedEmail || !name) {
     return errorResponse(res, 'Google email and name are required', 400);
   }
 
   try {
     // Find user by email or by provider id
-    let user = await prisma.user.findUnique({ where: { email } });
+    let user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
 
     if (user) {
       // If user exists but registered local, we can link it or reject
       if (user.provider !== 'google') {
         // Update provider to google, or just keep it
         user = await prisma.user.update({
-          where: { email },
+          where: { email: normalizedEmail },
           data: { provider: 'google' }
         });
       }
@@ -150,7 +162,7 @@ export const googleLogin = async (req, res) => {
       user = await prisma.user.create({
         data: {
           name,
-          email,
+          email: normalizedEmail,
           provider: 'google',
           baselineScore: 0
         }
