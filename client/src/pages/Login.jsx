@@ -1,6 +1,5 @@
 import React, { Suspense, useState, lazy } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Leaf, Mail, Lock, AlertCircle, ArrowRight, Sparkles } from 'lucide-react';
 
@@ -41,7 +40,8 @@ export default function Login() {
       
       const { useAuth } = await import('../context/AuthContext');
       // Directly hit endpoint or call handler
-      const res = await axios.post('/api/auth/google', mockGoogleData);
+      const { default: api } = await import('../api/axios');
+      const res = await api.post('/api/auth/google', mockGoogleData);
       if (res.data.success) {
         window.location.reload(); // reload to fetch profile
       }

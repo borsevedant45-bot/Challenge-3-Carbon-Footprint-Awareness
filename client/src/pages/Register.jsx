@@ -2,7 +2,7 @@ import React, { Suspense, useState, lazy } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Leaf, Mail, Lock, User, AlertCircle, ArrowRight } from 'lucide-react';
-import axios from 'axios';
+import api from '../api/axios';
 
 const GlobeScene = lazy(() => import('../components/GlobeScene'));
 
@@ -39,7 +39,7 @@ export default function Register() {
         googleId: 'google_1234567890'
       };
       
-      const res = await axios.post('/api/auth/google', mockGoogleData);
+      const res = await api.post('/api/auth/google', mockGoogleData);
       if (res.data.success) {
         window.location.reload();
       }

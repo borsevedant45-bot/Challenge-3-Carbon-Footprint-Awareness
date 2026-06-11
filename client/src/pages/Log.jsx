@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import { 
   Car, 
   Apple, 
@@ -113,7 +113,7 @@ export default function Log() {
         date: new Date()
       };
 
-      const res = await axios.post('/api/activities', payload);
+      const res = await api.post('/api/activities', payload);
       if (res.data.success) {
         setSavedCo2(co2Estimate);
         setTipMessage(res.data.data.microTip);

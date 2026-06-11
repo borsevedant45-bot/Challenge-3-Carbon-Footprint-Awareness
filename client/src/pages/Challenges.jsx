@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import ChallengeCard from '../components/ChallengeCard';
 import TiltCard from '../components/TiltCard';
 import { Trophy, Award, Zap, HelpCircle } from 'lucide-react';
@@ -15,8 +15,8 @@ export default function Challenges() {
     try {
       setLoading(true);
       
-      const allRes = await axios.get('/api/challenges');
-      const activeRes = await axios.get('/api/challenges/active');
+      const allRes = await api.get('/api/challenges');
+      const activeRes = await api.get('/api/challenges/active');
 
       if (allRes.data.success) {
         setChallenges(allRes.data.data);
@@ -40,7 +40,7 @@ export default function Challenges() {
   const handleJoin = async (challengeId) => {
     setActionLoading(true);
     try {
-      const res = await axios.post('/api/challenges/join', { challengeId });
+      const res = await api.post('/api/challenges/join', { challengeId });
       if (res.data.success) {
         // Refresh challenges data
         await fetchChallengesData();
@@ -57,7 +57,7 @@ export default function Challenges() {
   const handleComplete = async (userChallengeId) => {
     setActionLoading(true);
     try {
-      const res = await axios.post('/api/challenges/complete', { userChallengeId });
+      const res = await api.post('/api/challenges/complete', { userChallengeId });
       if (res.data.success) {
         // Refresh challenges data
         await fetchChallengesData();

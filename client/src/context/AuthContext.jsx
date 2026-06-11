@@ -1,13 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 
 const AuthContext = createContext();
-
-// Setup axios defaults for credentials (cookies) and base URL
-axios.defaults.withCredentials = true;
-if (import.meta.env.VITE_API_URL) {
-  axios.defaults.baseURL = import.meta.env.VITE_API_URL;
-}
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -17,14 +11,20 @@ export const AuthProvider = ({ children }) => {
   // Fetch current user session on mount
   useEffect(() => {
     const checkLoggedIn = async () => {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
-        const response = await axios.get('/api/auth/me');
+        const response = await api.get('/api/auth/me');
         if (response.data.success) {
           setUser(response.data.data);
         }
       } catch (error) {
-        // Not logged in or expired, fail silently
         setUser(null);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
       } finally {
         setLoading(false);
       }
@@ -51,8 +51,11 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      const res = await axios.post('/api/auth/login', { email, password });
+      const res = await api.post('/api/auth/login', { email, password });
       if (res.data.success) {
+        if (res.data.accessToken) {
+          localStorage.setItem('accessToken', res.data.accessToken);
+        }
         setUser(res.data.user);
         return { success: true };
       }
@@ -69,8 +72,11 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     setLoading(true);
     try {
-      const res = await axios.post('/api/auth/register', { name, email, password });
+      const res = await api.post('/api/auth/register', { name, email, password });
       if (res.data.success) {
+        if (res.data.accessToken) {
+          localStorage.setItem('accessToken', res.data.accessToken);
+        }
         setUser(res.data.user);
         return { success: true };
       }
@@ -86,17 +92,20 @@ export const AuthProvider = ({ children }) => {
   // Logout User
   const logout = async () => {
     try {
-      await axios.post('/api/auth/logout');
+      await api.post('/api/auth/logout');
       setUser(null);
     } catch (error) {
       console.error('Logout error:', error);
+    } finally {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
     }
   };
 
   // Save Baseline onboarding score
   const updateBaseline = async (quizData) => {
     try {
-      const res = await axios.post('/api/insights/baseline', quizData);
+      const res = await api.post('/api/insights/baseline', quizData);
       if (res.data.success) {
         const { baselineScore, geminiAnalysis } = res.data.data;
         setUser(prev => prev ? { ...prev, baselineScore } : null);

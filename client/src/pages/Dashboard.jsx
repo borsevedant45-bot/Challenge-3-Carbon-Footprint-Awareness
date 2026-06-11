@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../api/axios';
 import CO2Gauge from '../components/CO2Gauge';
 import ActivityCard from '../components/ActivityCard';
 import InsightTip from '../components/InsightTip';
@@ -46,13 +46,13 @@ export default function Dashboard() {
         setLoading(true);
         
         // Fetch summary
-        const summaryRes = await axios.get('/api/activities/summary');
+        const summaryRes = await api.get('/api/activities/summary');
         if (summaryRes.data.success) {
           setSummary(summaryRes.data.data);
         }
 
         // Fetch recent activities
-        const activitiesRes = await axios.get('/api/activities?limit=5');
+        const activitiesRes = await api.get('/api/activities?limit=5');
         if (activitiesRes.data.success) {
           setRecentActivities(activitiesRes.data.data);
         }
@@ -67,7 +67,7 @@ export default function Dashboard() {
     const fetchAiTip = async () => {
       try {
         setTipLoading(true);
-        const tipRes = await axios.get('/api/insights/daily-tip');
+        const tipRes = await api.get('/api/insights/daily-tip');
         if (tipRes.data.success) {
           setAiTip(tipRes.data.data.tip);
         }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import TiltCard from '../components/TiltCard';
 import { 
   Sparkles, 
@@ -31,7 +31,7 @@ export default function Offset() {
     const fetchOffsets = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('/api/offsets');
+        const res = await api.get('/api/offsets');
         if (res.data.success) {
           setOffsets(res.data.data);
         }
@@ -58,7 +58,7 @@ export default function Offset() {
 
     setPledgeLoading(true);
     try {
-      const res = await axios.post('/api/offsets/pledge', {
+      const res = await api.post('/api/offsets/pledge', {
         offsetId: selectedProject.id,
         tons: parseFloat(tons)
       });

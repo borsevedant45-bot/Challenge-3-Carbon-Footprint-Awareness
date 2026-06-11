@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { 
   BarChart, 
   Bar, 
@@ -31,7 +31,7 @@ export default function Insights() {
     const fetchAnalytics = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('/api/insights/charts');
+        const res = await api.get('/api/insights/charts');
         if (res.data.success) {
           setData(res.data.data);
         }

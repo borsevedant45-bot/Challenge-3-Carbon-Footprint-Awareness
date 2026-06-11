@@ -20,7 +20,7 @@ const app = express();
 // Trust Render's proxy for correct rate limiting IP detection
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
-const CLIENT_ORIGIN = process.env.CLIENT_URL || 'http://localhost:5173';
+const CLIENT_ORIGIN = process.env.CLIENT_URL || 'https://ecopulse-app.vercel.app';
 
 // 1. Security Headers (Helmet with Content Security Policy)
 app.use(helmet({
