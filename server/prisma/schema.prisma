@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id             String          @id @default(cuid())
+  name           String
+  email          String          @unique
+  passwordHash   String?
+  provider       String          @default("local")
+  baselineScore  Float?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  activities     Activity[]
+  goals          Goal[]
+  userChallenges UserChallenge[]
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  userId      String
+  category    String
+  description String
+  co2Kg       Float
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Goal {
+  id           String   @id @default(cuid())
+  userId       String
+  targetCo2Kg  Float
+  deadline     DateTime
+  achieved     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model Challenge {
+  id             String          @id @default(cuid())
+  title          String
+  description    String
+  co2SavedKg     Float
+  durationDays   Int
+  category       String
+  iconName       String
+  userChallenges UserChallenge[]
+}
+
+model UserChallenge {
+  id          String    @id @default(cuid())
+  userId      String
+  challengeId String
+  startDate   DateTime  @default(now())
+  completedAt DateTime?
+  status      String    @default("ACTIVE")
+  user        User      @relation(fields: [userId], references: [id])
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+}
+
+model Offset {
+  id           String  @id @default(cuid())
+  name         String
+  description  String
+  pricePerTon  Float
+  country      String
+  imageUrl     String?
+  verified     Boolean @default(false)
+}

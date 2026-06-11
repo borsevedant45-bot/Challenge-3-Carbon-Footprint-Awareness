@@ -1,0 +1,89 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             String          @id @default(uuid())
+  name           String
+  email          String          @unique
+  passwordHash   String?
+  provider       String          @default("local") // "local" or "google"
+  baselineScore  Float           @default(0)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  activities     Activity[]
+  goals          Goal[]
+  userChallenges UserChallenge[]
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    Category
+  description String
+  co2Kg       Float
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+enum Category {
+  TRANSPORT
+  FOOD
+  ENERGY
+  SHOPPING
+}
+
+model Goal {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetCo2Kg Float
+  deadline    DateTime
+  achieved    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Challenge {
+  id             String          @id @default(uuid())
+  title          String
+  description    String
+  co2SavedKg     Float
+  durationDays   Int
+  category       String
+  iconName       String
+  userChallenges UserChallenge[]
+}
+
+model UserChallenge {
+  id          String          @id @default(uuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challengeId String
+  challenge   Challenge       @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  startDate   DateTime        @default(now())
+  completedAt DateTime?
+  status      ChallengeStatus @default(ACTIVE)
+}
+
+enum ChallengeStatus {
+  ACTIVE
+  COMPLETED
+  FAILED
+}
+
+model Offset {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  pricePerTon Float
+  country     String
+  imageUrl    String
+  verified    Boolean  @default(true)
+}

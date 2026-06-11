@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+    @apply font-bold tracking-tight;
+  }
+  
+  body {
+    font-family: 'Nunito', sans-serif;
+  }
+}
+
+/* Custom Scrollbar for sleek UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(46, 204, 113, 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(46, 204, 113, 0.4);
+}
+
+/* Glassmorphism utility cards */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark .glass-card {
+  background: rgba(18, 45, 32, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Custom Nature Particles Animation (CSS Only) */
+@keyframes floatUp {
+  0% {
+    transform: translateY(105vh) translateX(0) scale(1) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-10vh) translateX(50px) scale(0.6) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.particle {
+  position: absolute;
+  bottom: -20px;
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.4) 0%, rgba(26, 107, 60, 0.2) 100%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: floatUp 15s linear infinite;
+  box-shadow: 0 0 10px rgba(46, 204, 113, 0.2);
+}
+
+/* Generate different speeds and sizes for floating particles */
+.particle-1 { width: 40px; height: 40px; left: 10%; animation-duration: 18s; animation-delay: 0s; }
+.particle-2 { width: 20px; height: 20px; left: 25%; animation-duration: 14s; animation-delay: 2s; }
+.particle-3 { width: 50px; height: 50px; left: 45%; animation-duration: 22s; animation-delay: 4s; }
+.particle-4 { width: 30px; height: 30px; left: 60%; animation-duration: 16s; animation-delay: 1s; }
+.particle-5 { width: 15px; height: 15px; left: 75%; animation-duration: 12s; animation-delay: 5s; }
+.particle-6 { width: 35px; height: 35px; left: 90%; animation-duration: 20s; animation-delay: 3s; }
+.particle-7 { width: 25px; height: 25px; left: 35%; animation-duration: 15s; animation-delay: 7s; }
+.particle-8 { width: 45px; height: 45px; left: 80%; animation-duration: 24s; animation-delay: 6s; }
+
+/* SVG Leaf decorations keyframes */
+@keyframes sway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(4deg); }
+}
+
+.sway-leaf {
+  animation: sway 6s ease-in-out infinite;
+  transform-origin: bottom center;
+}
