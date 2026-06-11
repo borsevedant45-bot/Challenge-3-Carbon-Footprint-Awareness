@@ -82,6 +82,7 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: false, message: 'Registration failed' };
     } catch (error) {
+      console.error('Register API error:', { status: error.response?.status, data: error.response?.data, message: error.message });
       const msg = error.response?.data?.message || 'Registration failed';
       return { success: false, message: msg };
     } finally {

@@ -15,7 +15,7 @@ export const validate = (req, res, next) => {
 };
 
 export const registerValidator = [
-  body('name').trim().notEmpty().withMessage('Name is required').escape(),
+  body('name').trim().notEmpty().withMessage('Name is required'),
   body('email').trim().isEmail().withMessage('Valid email is required').normalizeEmail(),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
   validate
