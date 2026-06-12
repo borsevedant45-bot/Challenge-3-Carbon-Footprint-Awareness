@@ -1,8 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
+import { motion } from 'framer-motion';
 import api from '../api/axios';
-import ChallengeCard from '../components/ChallengeCard';
 import TiltCard from '../components/TiltCard';
+import ChallengeCard from '../components/ChallengeCard';
 import { Trophy, Award, Zap } from 'lucide-react';
+
+const FadingVideo = lazy(() => import('../components/FadingVideo'));
+
+const stagger = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.08, duration: 0.5, ease: 'easeOut' },
+  }),
+};
 
 export default function Challenges() {
   const [challenges, setChallenges] = useState([]);
@@ -10,11 +22,13 @@ export default function Challenges() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const fetchChallengesData = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const allRes = await api.get('/api/challenges');
-      const activeRes = await api.get('/api/challenges/active');
+      const [allRes, activeRes] = await Promise.all([
+        api.get('/api/challenges'),
+        api.get('/api/challenges/active'),
+      ]);
       if (allRes.data.success) setChallenges(allRes.data.data);
       if (activeRes.data.success) setUserChallenges(activeRes.data.data);
     } catch (error) {
@@ -24,15 +38,13 @@ export default function Challenges() {
     }
   };
 
-  useEffect(() => {
-    fetchChallengesData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const handleJoin = async (challengeId) => {
     setActionLoading(true);
     try {
       const res = await api.post('/api/challenges/join', { challengeId });
-      if (res.data.success) await fetchChallengesData();
+      if (res.data.success) await fetchData();
     } catch (err) {
       console.error('Error joining challenge:', err);
       alert(err.response?.data?.message || 'Error joining challenge');
@@ -45,7 +57,7 @@ export default function Challenges() {
     setActionLoading(true);
     try {
       const res = await api.post('/api/challenges/complete', { userChallengeId });
-      if (res.data.success) await fetchChallengesData();
+      if (res.data.success) await fetchData();
     } catch (err) {
       console.error('Error completing challenge:', err);
       alert(err.response?.data?.message || 'Error completing challenge');
@@ -54,71 +66,75 @@ export default function Challenges() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center bg-[#050D07]">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#2ECC71]" />
-          <p className="text-xs font-semibold text-white/40 uppercase tracking-widest animate-pulse">Loading challenges board...</p>
-        </div>
-      </div>
-    );
-  }
-
   const ucMap = {};
-  userChallenges.forEach(uc => { ucMap[uc.challengeId] = uc; });
-
-  const activeCount = userChallenges.filter(uc => uc.status === 'ACTIVE').length;
-  const completedCount = userChallenges.filter(uc => uc.status === 'COMPLETED').length;
+  userChallenges.forEach((uc) => { ucMap[uc.challengeId] = uc; });
+  const activeCount = userChallenges.filter((uc) => uc.status === 'ACTIVE').length;
+  const completedCount = userChallenges.filter((uc) => uc.status === 'COMPLETED').length;
 
   return (
-    <div className="min-h-screen bg-[#050D07]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+    <div className="min-h-screen bg-[#050D07] relative">
+      <div className="fixed inset-0 z-0 opacity-15 pointer-events-none">
+        <Suspense fallback={null}>
+          <FadingVideo
+            src="https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4"
+            className="w-full h-full object-cover"
+          />
+        </Suspense>
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-8 pb-16 space-y-6">
+        <motion.div
+          custom={0}
+          variants={stagger}
+          initial="hidden"
+          animate="visible"
+          className="liquid-glass-strong rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+        >
           <div>
-            <h1 className="text-3xl sm:text-4xl font-display font-bold text-white">Gamified Challenges</h1>
-            <p className="text-sm text-white/40 font-body mt-1">Complete green challenges to earn verified sustainable badges and reduce carbon output.</p>
+            <h1 className="text-4xl font-display font-bold text-white">Mission Board</h1>
+            <p className="text-sm font-body text-white/60 mt-1">Complete challenges, earn badges, save the planet</p>
           </div>
-          <div className="flex items-center space-x-3.5">
-            <div className="flex items-center space-x-1.5 px-4.5 py-2.5 liquid-glass-card rounded-2xl">
-              <Zap className="h-5 w-5 text-blue-400 animate-pulse" />
-              <span className="text-xs font-bold text-white/80">{activeCount} Active</span>
+          <div className="flex gap-3">
+            <div className="liquid-glass rounded-full px-4 py-2 text-sm font-body flex items-center space-x-1.5">
+              <Zap className="h-4 w-4 text-blue-400" />
+              <span className="text-white/80">{activeCount} Active Missions</span>
             </div>
-            <div className="flex items-center space-x-1.5 px-4.5 py-2.5 liquid-glass-card rounded-2xl">
-              <Award className="h-5 w-5 text-[#2ECC71]" />
-              <span className="text-xs font-bold text-white/80">{completedCount} Badges</span>
+            <div className="liquid-glass rounded-full px-4 py-2 text-sm font-body flex items-center space-x-1.5">
+              <Trophy className="h-4 w-4 text-[#2ECC71]" />
+              <span className="text-white/80">{completedCount} Badges Earned</span>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="liquid-glass-card rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1.5 text-center md:text-left">
-            <h3 className="text-lg font-display font-bold text-white">Compete for a cleaner future!</h3>
-            <p className="text-sm text-white/60 font-body leading-relaxed max-w-xl">
-              Choose from transportation, shopping, diet, or home energy tasks. Committing to small habits yields major collective changes.
-            </p>
-          </div>
-          <div className="flex shrink-0 p-4 bg-white/5 rounded-2xl">
-            <Trophy className="h-10 w-10 text-[#F0A500]" />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-display font-bold text-white">Available Challenges</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {challenges.map((challenge) => (
-              <TiltCard key={challenge.id}>
-                <ChallengeCard
-                  challenge={challenge}
-                  userChallenge={ucMap[challenge.id]}
-                  onJoin={handleJoin}
-                  onComplete={handleComplete}
-                  loading={actionLoading}
-                />
-              </TiltCard>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="liquid-glass rounded-2xl h-64 animate-pulse" />
             ))}
           </div>
-        </div>
+        ) : (
+          <motion.div
+            custom={1}
+            variants={stagger}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {challenges.map((challenge, i) => (
+              <motion.div key={challenge.id} custom={2 + i} variants={stagger} initial="hidden" animate="visible">
+                <TiltCard>
+                  <ChallengeCard
+                    challenge={challenge}
+                    userChallenge={ucMap[challenge.id]}
+                    onJoin={handleJoin}
+                    onComplete={handleComplete}
+                    loading={actionLoading}
+                  />
+                </TiltCard>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
       </div>
     </div>
   );

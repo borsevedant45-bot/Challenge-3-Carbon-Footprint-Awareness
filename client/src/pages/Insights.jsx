@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import api from '../api/axios';
 import {
   BarChart,
@@ -9,24 +10,43 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
+  Area,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  CartesianGrid,
 } from 'recharts';
-import { Sparkles, BarChart3, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Sparkles, TrendingUp, AlertTriangle, ArrowDown, ArrowUp } from 'lucide-react';
 
-const COLORS = ['#3B82F6', '#2ECC71', '#F0A500', '#8B5CF6'];
+const COLORS = ['#3B82F6', '#2ECC71', '#F0A500', '#EC4899'];
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="liquid-glass-card rounded-xl p-3 text-xs">
-        <p className="text-white/70 font-medium">{label}</p>
-        <p className="text-white font-bold">{payload[0].value} kg</p>
+      <div
+        className="rounded-xl p-3 text-xs"
+        style={{
+          background: 'rgba(5,13,7,0.9)',
+          border: '1px solid rgba(46,204,113,0.3)',
+          borderRadius: '12px',
+          color: 'white',
+        }}
+      >
+        <p className="text-white/70 font-body">{label}</p>
+        <p className="text-white font-display font-bold">{payload[0].value} kg</p>
       </div>
     );
   }
   return null;
+};
+
+const stagger = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.08, duration: 0.5, ease: 'easeOut' },
+  }),
 };
 
 export default function Insights() {
@@ -36,17 +56,20 @@ export default function Insights() {
     monthlyChart: [],
     breakdownChart: [],
     biggestSource: 'None',
-    averageComparison: 15
+    biggestSourcePct: 0,
+    averageComparison: 15,
+    trend: 0,
   });
+
+  const now = new Date();
+  const monthYear = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
         setLoading(true);
         const res = await api.get('/api/insights/charts');
-        if (res.data.success) {
-          setData(res.data.data);
-        }
+        if (res.data.success) setData(res.data.data);
       } catch (error) {
         console.error('Error fetching charts data:', error);
       } finally {
@@ -56,192 +79,173 @@ export default function Insights() {
     fetchAnalytics();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center bg-[#050D07]">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#2ECC71]" />
-          <p className="text-xs font-semibold text-white/40 uppercase tracking-widest animate-pulse">
-            Compiling analytics data...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   const totalBreakdown = data.breakdownChart.reduce((sum, item) => sum + item.value, 0);
+  const isBelowAvg = data.averageComparison > 0;
+  const trendIsUp = data.trend > 0;
 
   return (
     <div className="min-h-screen bg-[#050D07]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-display font-bold text-white">
-            Carbon Insights
-          </h1>
-          <p className="text-sm text-white/40 font-body mt-1">
-            Detailed visual breakdowns and performance trends of your carbon footprint.
-          </p>
-        </div>
+      <div className="max-w-7xl mx-auto px-6 pt-8 pb-16 space-y-6">
+        <motion.div custom={0} variants={stagger} initial="hidden" animate="visible">
+          <h1 className="text-4xl font-display font-bold text-white">Your Carbon Insights</h1>
+          <p className="text-sm font-body text-white/40 mt-1">{monthYear}</p>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="liquid-glass-card rounded-2xl p-6 flex items-center space-x-4">
-            <div className="p-3 rounded-xl bg-red-950/30 text-red-400">
-              <AlertTriangle className="h-6 w-6" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold tracking-widest text-white/30 uppercase block">
-                Highest Source
-              </span>
-              <span className="text-lg font-display font-bold text-white mt-0.5 block">
-                {data.biggestSource}
-              </span>
-            </div>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="liquid-glass rounded-2xl h-32 animate-pulse" />
+            ))}
           </div>
-
-          <div className="liquid-glass-card rounded-2xl p-6 flex items-center space-x-4">
-            <div className="p-3 rounded-xl bg-green-950/30 text-[#2ECC71]">
-              <Sparkles className="h-6 w-6" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold tracking-widest text-white/30 uppercase block">
-                Average Comparison
-              </span>
-              <span className="text-xs font-medium text-white/70 mt-0.5 block leading-tight">
-                You emit roughly <span className="text-[#2ECC71] font-bold">{data.averageComparison}% less</span> than the national average in India.
-              </span>
-            </div>
-          </div>
-
-          <div className="liquid-glass-card rounded-2xl p-6 flex items-center space-x-4">
-            <div className="p-3 rounded-xl bg-amber-950/30 text-[#F0A500]">
-              <TrendingUp className="h-6 w-6" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold tracking-widest text-white/30 uppercase block">
-                Reduction Trend
-              </span>
-              <span className="text-lg font-display font-bold text-white mt-0.5 block">
-                Steady (-8.2%)
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 liquid-glass-card rounded-2xl p-6 space-y-6">
-            <div className="flex items-center space-x-2">
-              <BarChart3 className="h-5 w-5 text-[#2ECC71]" />
-              <h3 className="text-base font-bold text-white uppercase tracking-wider">
-                Weekly Emissions (Last 7 Days)
-              </h3>
-            </div>
-
-            <div className="h-80 w-full text-xs font-medium">
-              {data.weeklyChart.length === 0 ? (
-                <div className="h-full flex items-center justify-center text-white/40">
-                  Log weekly transport or food items to view comparison charts.
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data.weeklyChart} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                    <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" tickLine={false} axisLine={false} />
-                    <YAxis stroke="rgba(255,255,255,0.3)" tickLine={false} axisLine={false} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="co2" fill="#2ECC71" radius={[8, 8, 0, 0]} maxBarSize={45} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-          </div>
-
-          <div className="lg:col-span-1 liquid-glass-card rounded-2xl p-6 flex flex-col justify-between space-y-6">
-            <div className="flex items-center space-x-2">
-              <Sparkles className="h-5 w-5 text-[#8B5CF6]" />
-              <h3 className="text-base font-bold text-white uppercase tracking-wider">
-                Category Shares
-              </h3>
-            </div>
-
-            <div className="h-48 w-full relative flex items-center justify-center">
-              {totalBreakdown === 0 ? (
-                <div className="text-xs text-white/40">No data logged.</div>
-              ) : (
-                <>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={data.breakdownChart}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={75}
-                        paddingAngle={4}
-                        dataKey="value"
-                      >
-                        {data.breakdownChart.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip content={<CustomTooltip />} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="absolute text-center flex flex-col items-center">
-                    <span className="text-lg font-display font-bold text-white">
-                      {Math.round(totalBreakdown)}
-                    </span>
-                    <span className="text-[9px] font-bold text-white/30 uppercase">
-                      Total kg
-                    </span>
+        ) : (
+          <>
+            {/* Row 1: Status Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <motion.div custom={1} variants={stagger} initial="hidden" animate="visible" className="liquid-glass-card rounded-2xl p-6 border-l-4 border-amber-400">
+                <p className="text-xs font-body text-white/50 uppercase tracking-wider">Primary Emission Source</p>
+                <div className="mt-3 flex items-center space-x-3">
+                  <AlertTriangle className="h-10 w-10 text-amber-400" />
+                  <div>
+                    <p className="text-3xl font-display font-bold text-white">{data.biggestSource}</p>
+                    <p className="text-sm font-body text-white/60 mt-1">Accounts for {data.biggestSourcePct}% of your footprint</p>
                   </div>
-                </>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-[10px] font-bold">
-              {data.breakdownChart.map((item, idx) => (
-                <div key={item.name} className="flex items-center space-x-2">
-                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
-                  <span className="text-white/60 truncate">
-                    {item.name}: {item.value} kg
-                  </span>
                 </div>
-              ))}
+              </motion.div>
+
+              <motion.div
+                custom={2}
+                variants={stagger}
+                initial="hidden"
+                animate="visible"
+                className={`liquid-glass-card rounded-2xl p-6 border-l-4 ${isBelowAvg ? 'border-green-400' : 'border-red-400'}`}
+              >
+                <p className="text-xs font-body text-white/50 uppercase tracking-wider">vs India Average</p>
+                <div className="mt-3">
+                  <span className={`text-4xl font-display font-bold ${isBelowAvg ? 'text-green-400' : 'text-red-400'}`}>
+                    {isBelowAvg ? '↓' : '↑'} {Math.abs(data.averageComparison)}% {isBelowAvg ? 'below' : 'above'}
+                  </span>
+                  <p className="text-xs font-body text-white/40 mt-1">National average: 1.9 tons/year</p>
+                </div>
+              </motion.div>
+
+              <motion.div custom={3} variants={stagger} initial="hidden" animate="visible" className="liquid-glass-card rounded-2xl p-6 border-l-4 border-blue-400">
+                <p className="text-xs font-body text-white/50 uppercase tracking-wider">This Month's Trend</p>
+                <div className="mt-3 flex items-center space-x-3">
+                  <div>
+                    <span className="text-4xl font-display font-bold text-white flex items-center">
+                      {trendIsUp ? <ArrowUp className="h-6 w-6 text-red-400 mr-1" /> : <ArrowDown className="h-6 w-6 text-green-400 mr-1" />}
+                      {Math.abs(data.trend).toFixed(1)}%
+                    </span>
+                    <p className="text-xs font-body text-white/40 mt-1">compared to last month</p>
+                  </div>
+                </div>
+              </motion.div>
             </div>
-          </div>
-        </div>
 
-        <div className="liquid-glass-card rounded-2xl p-6 space-y-6">
-          <div className="flex items-center space-x-2">
-            <TrendingUp className="h-5 w-5 text-[#F0A500]" />
-            <h3 className="text-base font-bold text-white uppercase tracking-wider">
-              Monthly Footprint Trend (Last 3 Months)
-            </h3>
-          </div>
-
-          <div className="h-64 w-full text-xs font-medium">
-            {data.monthlyChart.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-white/40">
-                No historical monthly data recorded.
+            {/* Row 2: Weekly Chart */}
+            <motion.div custom={4} variants={stagger} initial="hidden" animate="visible" className="liquid-glass-card rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-base font-display font-bold text-white">Weekly Emissions</h3>
+                <span className="text-xs font-body text-white/40">Last 7 days</span>
               </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data.monthlyChart} margin={{ top: 10, right: 20, left: -25, bottom: 0 }}>
-                  <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" tickLine={false} axisLine={false} />
-                  <YAxis stroke="rgba(255,255,255,0.3)" tickLine={false} axisLine={false} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Line
-                    type="monotone"
-                    dataKey="co2"
-                    stroke="#F0A500"
-                    strokeWidth={4}
-                    dot={{ r: 6, strokeWidth: 0, fill: '#F0A500' }}
-                    activeDot={{ r: 8 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
+              <div className="h-72 w-full">
+                {data.weeklyChart.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-white/30">
+                    <Sparkles className="h-10 w-10 mb-2 opacity-50" />
+                    <p className="text-sm font-body">Start logging activities to see your weekly chart</p>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data.weeklyChart} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                      <CartesianGrid stroke="rgba(46,204,113,0.08)" vertical={false} />
+                      <XAxis dataKey="name" stroke="rgba(255,255,255,0.4)" tick={{ fontFamily: 'Nunito', fontSize: 12 }} tickLine={false} axisLine={false} />
+                      <YAxis stroke="rgba(255,255,255,0.4)" tick={{ fontFamily: 'Nunito', fontSize: 12 }} tickLine={false} axisLine={false} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar dataKey="co2" fill="#2ECC71" radius={[4, 4, 0, 0]} maxBarSize={40} opacity={0.9} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Row 3: Category Shares + Monthly Trend */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <motion.div custom={5} variants={stagger} initial="hidden" animate="visible" className="liquid-glass-card rounded-2xl p-6">
+                <h3 className="text-base font-display font-bold text-white mb-6">Category Shares</h3>
+                <div className="h-56">
+                  {totalBreakdown === 0 ? (
+                    <div className="h-full flex items-center justify-center text-white/30 text-sm font-body">No data logged yet</div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={data.breakdownChart}
+                          cx="50%" cy="50%"
+                          innerRadius={55}
+                          outerRadius={85}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          {data.breakdownChart.map((entry, index) => (
+                            <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip content={<CustomTooltip />} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2 mt-4 justify-center">
+                  {data.breakdownChart.map((item, idx) => (
+                    <div key={item.name} className="liquid-glass rounded-full px-3 py-1 text-xs flex items-center space-x-1.5">
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
+                      <span className="text-white/70 font-body">{item.name}</span>
+                      <span className="text-white/40 font-body">
+                        {totalBreakdown > 0 ? `${Math.round((item.value / totalBreakdown) * 100)}%` : ''}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+
+              <motion.div custom={6} variants={stagger} initial="hidden" animate="visible" className="liquid-glass-card rounded-2xl p-6">
+                <h3 className="text-base font-display font-bold text-white mb-6">Monthly Trend</h3>
+                <div className="h-56">
+                  {data.monthlyChart.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-white/30">
+                      <TrendingUp className="h-10 w-10 mb-2 opacity-50" />
+                      <p className="text-sm font-body">Insufficient data for trend</p>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={data.monthlyChart} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid stroke="rgba(46,204,113,0.08)" vertical={false} />
+                        <XAxis dataKey="name" stroke="rgba(255,255,255,0.4)" tick={{ fontFamily: 'Nunito', fontSize: 12 }} tickLine={false} axisLine={false} />
+                        <YAxis stroke="rgba(255,255,255,0.4)" tick={{ fontFamily: 'Nunito', fontSize: 12 }} tickLine={false} axisLine={false} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <defs>
+                          <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#2ECC71" stopOpacity={0.3} />
+                            <stop offset="100%" stopColor="#2ECC71" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <Area type="monotone" dataKey="co2" fill="url(#lineGradient)" stroke="none" />
+                        <Line
+                          type="monotone"
+                          dataKey="co2"
+                          stroke="#2ECC71"
+                          strokeWidth={2}
+                          dot={{ r: 5, fill: '#2ECC71', strokeWidth: 0 }}
+                          activeDot={{ r: 7, fill: '#2ECC71' }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
