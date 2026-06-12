@@ -6,7 +6,6 @@ import Navbar from './components/Navbar';
 import AuroraBackground from './components/AuroraBackground';
 import FloatingLeaves from './components/FloatingLeaves';
 
-// Page Imports
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Onboarding from './pages/Onboarding';
@@ -38,14 +37,13 @@ function AnimatedPage({ children }) {
   );
 }
 
-// Protected Route Guard
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-nature-bg dark:bg-nature-darkBg">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-secondary" />
+      <div className="min-h-screen flex items-center justify-center bg-[#050D07]">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#2ECC71]" />
       </div>
     );
   }
@@ -57,14 +55,13 @@ function ProtectedRoute({ children }) {
   return <AnimatedPage>{children}</AnimatedPage>;
 }
 
-// Public Route Guard (Redirects to dashboard if already logged in)
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-nature-bg dark:bg-nature-darkBg">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-secondary" />
+      <div className="min-h-screen flex items-center justify-center bg-[#050D07]">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#2ECC71]" />
       </div>
     );
   }
@@ -80,70 +77,63 @@ function AppContent() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen flex flex-col bg-nature-bg dark:bg-nature-darkBg text-gray-800 dark:text-nature-darkText transition-colors duration-300">
+    <div className="min-h-screen flex flex-col bg-[#050D07] text-white/90 transition-colors duration-300">
       <AuroraBackground />
       <FloatingLeaves />
       <Navbar />
       <main className="flex-grow">
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
-            {/* Public Auth Routes */}
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
             <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-
-            {/* Onboarding Wizard Route */}
-            <Route 
-              path="/onboarding" 
+            <Route
+              path="/onboarding"
               element={
                 <ProtectedRoute>
                   <Onboarding />
                 </ProtectedRoute>
-              } 
+              }
             />
-
-            {/* Protected User Dashboard & Application Pages */}
-            <Route 
-              path="/" 
+            <Route
+              path="/"
               element={
                 <ProtectedRoute>
                   <Dashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/log" 
+            <Route
+              path="/log"
               element={
                 <ProtectedRoute>
                   <Log />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/insights" 
+            <Route
+              path="/insights"
               element={
                 <ProtectedRoute>
                   <Insights />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/challenges" 
+            <Route
+              path="/challenges"
               element={
                 <ProtectedRoute>
                   <Challenges />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/offset" 
+            <Route
+              path="/offset"
               element={
                 <ProtectedRoute>
                   <Offset />
                 </ProtectedRoute>
-              } 
+              }
             />
-
-            {/* Fallback redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AnimatePresence>

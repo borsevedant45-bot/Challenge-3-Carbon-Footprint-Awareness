@@ -1,5 +1,5 @@
-import React, { useRef, useMemo, useEffect } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import React, { useRef, useMemo } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 const LEAF_COLORS = ['#2ECC71', '#1A6B3C', '#52D68A'];
@@ -63,14 +63,6 @@ function FloatingLeaves() {
   const prefersReducedMotion = useMemo(() => {
     if (typeof window === 'undefined') return false;
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }, []);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const handler = (e) => {
-    };
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
   }, []);
 
   if (prefersReducedMotion) return null;

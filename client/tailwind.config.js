@@ -8,6 +8,19 @@ export default {
   theme: {
     extend: {
       colors: {
+        forest: {
+          950: '#050D07',
+          900: '#0D1F16',
+          800: '#1A3A26',
+          700: '#1A6B3C',
+          600: '#2ECC71',
+          400: '#52D68A',
+          200: '#A8F0C2',
+        },
+        amber: {
+          DEFAULT: '#F0A500',
+        },
+        glass: 'rgba(255,255,255,0.04)',
         primary: {
           DEFAULT: '#1A6B3C',
           dark: '#114a29',

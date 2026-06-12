@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 const ELLIPSES = [
@@ -14,38 +14,45 @@ function AuroraBackground() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }, []);
 
-  if (prefersReducedMotion) return null;
-
   return (
     <div className="fixed inset-0 z-[-2] pointer-events-none overflow-hidden">
-      {ELLIPSES.map((ellipse, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full"
+      {prefersReducedMotion ? (
+        <div
+          className="absolute inset-0"
           style={{
-            width: ellipse.width,
-            height: ellipse.height,
-            backgroundColor: ellipse.color,
-            opacity: ellipse.opacity,
-            filter: 'blur(100px)',
-            top: '50%',
-            left: '50%',
-            marginTop: -ellipse.height / 2,
-            marginLeft: -ellipse.width / 2,
-          }}
-          animate={{
-            x: [0, ellipse.x, 0, -ellipse.x, 0],
-            y: [0, ellipse.y, 0, -ellipse.y, 0],
-            scale: [1, 1.1, 0.95, 1.05, 1],
-          }}
-          transition={{
-            duration: ellipse.duration,
-            delay: ellipse.delay,
-            repeat: Infinity,
-            ease: 'easeInOut',
+            background: 'radial-gradient(ellipse at 30% 20%, rgba(26,107,60,0.15) 0%, transparent 50%), radial-gradient(ellipse at 70% 60%, rgba(46,204,113,0.1) 0%, transparent 50%)',
           }}
         />
-      ))}
+      ) : (
+        ELLIPSES.map((ellipse, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: ellipse.width,
+              height: ellipse.height,
+              backgroundColor: ellipse.color,
+              opacity: ellipse.opacity,
+              filter: 'blur(100px)',
+              top: '50%',
+              left: '50%',
+              marginTop: -ellipse.height / 2,
+              marginLeft: -ellipse.width / 2,
+            }}
+            animate={{
+              x: [0, ellipse.x, 0, -ellipse.x, 0],
+              y: [0, ellipse.y, 0, -ellipse.y, 0],
+              scale: [1, 1.1, 0.95, 1.05, 1],
+            }}
+            transition={{
+              duration: ellipse.duration,
+              delay: ellipse.delay,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+        ))
+      )}
     </div>
   );
 }

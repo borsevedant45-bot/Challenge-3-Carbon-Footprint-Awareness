@@ -11,7 +11,7 @@ let model = null;
 if (apiKey) {
   try {
     genAI = new GoogleGenerativeAI(apiKey);
-    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
   } catch (error) {
     console.error('Failed to initialize GoogleGenerativeAI:', error);
   }

@@ -83,13 +83,12 @@ export default function CO2Gauge({ value = 0, target = 250 }) {
 
   return (
     <div
-      className="flex flex-col items-center justify-center p-6 bg-white dark:bg-nature-cardDark rounded-3xl border border-gray-100 dark:border-nature-darkBg/20 shadow-nature transition-all duration-300 relative overflow-hidden"
+      className="liquid-glass-card rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden"
       style={{
         filter: `drop-shadow(0 0 20px ${glowColor}40)`,
-        boxShadow: `0 0 30px ${glowColor}20, inset 0 0 30px ${glowColor}10`,
       }}
     >
-      <h3 className="text-gray-500 dark:text-nature-darkText/60 text-sm font-semibold mb-6">
+      <h3 className="text-white/60 text-sm font-semibold mb-6">
         Monthly Budget Status
       </h3>
 
@@ -99,7 +98,7 @@ export default function CO2Gauge({ value = 0, target = 250 }) {
             cx="100"
             cy="100"
             r={radius}
-            className="stroke-gray-100 dark:stroke-nature-darkBg/30 fill-none"
+            className="stroke-white/5 fill-none"
             strokeWidth={strokeWidth}
           />
           <motion.circle
@@ -119,26 +118,25 @@ export default function CO2Gauge({ value = 0, target = 250 }) {
 
         <div className="absolute flex flex-col items-center text-center">
           <div className="flex items-baseline">
-            <motion.span className="text-4xl font-display font-black text-gray-800 dark:text-nature-darkText">
+            <motion.span className="text-4xl font-display font-bold text-white">
               {animatedValue}
             </motion.span>
-            <span className="text-xs font-bold text-gray-400 dark:text-nature-darkText/40 ml-0.5">kg</span>
+            <span className="text-xs font-bold text-white/40 ml-0.5">kg</span>
           </div>
-          <div className="text-[10px] font-bold text-gray-400 dark:text-nature-darkText/30 uppercase tracking-widest mt-1">
+          <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">
             of {roundedTarget} kg
           </div>
-          <div className={`text-xs font-extrabold mt-2 px-2.5 py-0.5 rounded-full ${
+          <div className={`text-xs font-bold mt-2 px-2.5 py-0.5 rounded-full ${
             isExceeded
-              ? 'bg-red-50 dark:bg-red-950/20 text-red-600'
+              ? 'bg-red-950/30 text-red-400'
               : isWarning
-                ? 'bg-amber-50 dark:bg-amber-950/20 text-accent'
-                : 'bg-green-50 dark:bg-green-950/20 text-secondary'
+                ? 'bg-amber-950/30 text-amber-400'
+                : 'bg-green-950/30 text-green-400'
           }`}>
             {displayPercent}% Used
           </div>
         </div>
 
-        {/* Pulsing dot at needle tip */}
         <motion.div
           className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full"
           style={{
@@ -154,12 +152,12 @@ export default function CO2Gauge({ value = 0, target = 250 }) {
 
       <div className="mt-6 text-center">
         {isExceeded ? (
-          <p className="text-xs font-medium text-red-500">
-            ⚠️ You've exceeded your monthly footprint target!
+          <p className="text-xs font-medium text-red-400">
+            You've exceeded your monthly footprint target!
           </p>
         ) : (
-          <p className="text-xs font-medium text-gray-500 dark:text-nature-darkText/60">
-            🌳 You have <span className="font-extrabold text-secondary">{Math.max(0, roundedTarget - roundedValue)} kg</span> of CO₂ remaining this month.
+          <p className="text-xs font-medium text-white/60">
+            You have <span className="font-bold text-[#2ECC71]">{Math.max(0, roundedTarget - roundedValue)} kg</span> of CO₂ remaining this month.
           </p>
         )}
       </div>

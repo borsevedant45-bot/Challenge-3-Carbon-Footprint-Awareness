@@ -4,91 +4,58 @@ import { Car, Apple, Zap, ShoppingBag, ArrowDownRight, ArrowUpRight } from 'luci
 export default function ActivityCard({ activity }) {
   const { category, description, co2Kg, date } = activity;
 
-  // Format date
   const formattedDate = new Date(date).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric'
   });
 
-  // Category Icon & Color definitions
   const getCategoryStyles = () => {
     switch (category) {
       case 'TRANSPORT':
-        return {
-          icon: Car,
-          bgColor: 'bg-blue-50 dark:bg-blue-950/20',
-          iconColor: 'text-blue-500 dark:text-blue-400'
-        };
+        return { icon: Car, iconColor: '#3B82F6', bg: 'rgba(59,130,246,0.15)' };
       case 'FOOD':
-        return {
-          icon: Apple,
-          bgColor: 'bg-green-50 dark:bg-green-950/20',
-          iconColor: 'text-secondary'
-        };
+        return { icon: Apple, iconColor: '#2ECC71', bg: 'rgba(46,204,113,0.15)' };
       case 'ENERGY':
-        // If CO2 is negative, it's an offset pledge
-        if (co2Kg < 0) {
-          return {
-            icon: Zap,
-            bgColor: 'bg-emerald-50 dark:bg-emerald-950/25',
-            iconColor: 'text-emerald-500 dark:text-emerald-400'
-          };
-        }
-        return {
-          icon: Zap,
-          bgColor: 'bg-amber-50 dark:bg-amber-950/20',
-          iconColor: 'text-accent'
-        };
+        if (co2Kg < 0) return { icon: Zap, iconColor: '#10B981', bg: 'rgba(16,185,129,0.15)' };
+        return { icon: Zap, iconColor: '#F0A500', bg: 'rgba(240,165,0,0.15)' };
       case 'SHOPPING':
-        return {
-          icon: ShoppingBag,
-          bgColor: 'bg-purple-50 dark:bg-purple-950/20',
-          iconColor: 'text-purple-500'
-        };
+        return { icon: ShoppingBag, iconColor: '#8B5CF6', bg: 'rgba(139,92,246,0.15)' };
       default:
-        return {
-          icon: Zap,
-          bgColor: 'bg-gray-50 dark:bg-gray-950/20',
-          iconColor: 'text-gray-500'
-        };
+        return { icon: Zap, iconColor: '#9CA3AF', bg: 'rgba(156,163,175,0.15)' };
     }
   };
 
-  const { icon: CategoryIcon, bgColor, iconColor } = getCategoryStyles();
+  const { icon: CategoryIcon, iconColor, bg } = getCategoryStyles();
   const isOffset = co2Kg < 0;
 
   return (
-    <div className="flex items-center justify-between p-4 bg-white dark:bg-nature-cardDark rounded-2xl border border-gray-100 dark:border-nature-darkBg/20 hover:shadow-natureHover hover:-translate-y-1 transition-all duration-300">
+    <div className="liquid-glass-card rounded-xl p-3 flex items-center justify-between hover:scale-[1.01] transition-transform duration-300">
       <div className="flex items-center space-x-3.5">
-        {/* Left Icon */}
-        <div className={`p-3 rounded-xl ${bgColor} ${iconColor}`}>
-          <CategoryIcon className="h-5 w-5" />
+        <div className="p-3 rounded-xl" style={{ backgroundColor: bg }}>
+          <CategoryIcon className="h-5 w-5" style={{ color: iconColor }} />
         </div>
-        
-        {/* Texts */}
         <div className="flex flex-col">
-          <span className="text-xs font-bold text-gray-400 dark:text-nature-darkText/30 uppercase tracking-wider">
+          <span className="text-xs font-bold text-white/30 uppercase tracking-wider">
             {category} {isOffset && '• OFFSET'}
           </span>
-          <span className="text-sm font-semibold text-gray-700 dark:text-nature-darkText max-w-[200px] sm:max-w-md truncate">
+          <span className="text-sm font-medium text-white/80 max-w-[200px] sm:max-w-md truncate">
             {description}
           </span>
-          <span className="text-[10px] font-medium text-gray-400 dark:text-nature-darkText/40">
+          <span className="text-[10px] font-medium text-white/40">
             {formattedDate}
           </span>
         </div>
       </div>
 
-      {/* CO2 indicator */}
       <div className="flex items-center space-x-1">
         {isOffset ? (
-          <div className="flex items-center text-emerald-600 dark:text-emerald-400 font-extrabold text-sm sm:text-base">
+          <div className="flex items-center text-emerald-400 font-bold text-sm">
             <ArrowDownRight className="h-4 w-4 mr-0.5" />
             <span>{Math.abs(Math.round(co2Kg))} kg</span>
           </div>
         ) : (
-          <div className="flex items-center text-gray-700 dark:text-nature-darkText font-extrabold text-sm sm:text-base">
+          <div className="flex items-center text-white font-bold text-sm">
             <ArrowUpRight className="h-4 w-4 mr-0.5 text-red-400" />
             <span>{Math.round(co2Kg)} kg</span>
           </div>

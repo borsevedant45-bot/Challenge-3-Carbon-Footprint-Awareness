@@ -10,6 +10,8 @@
   
   body {
     font-family: 'Nunito', sans-serif;
+    background: #050D07;
+    color: rgba(255,255,255,0.9);
   }
 }
 
@@ -75,7 +77,6 @@
   box-shadow: 0 0 10px rgba(46, 204, 113, 0.2);
 }
 
-/* Generate different speeds and sizes for floating particles */
 .particle-1 { width: 40px; height: 40px; left: 10%; animation-duration: 18s; animation-delay: 0s; }
 .particle-2 { width: 20px; height: 20px; left: 25%; animation-duration: 14s; animation-delay: 2s; }
 .particle-3 { width: 50px; height: 50px; left: 45%; animation-duration: 22s; animation-delay: 4s; }
@@ -85,7 +86,6 @@
 .particle-7 { width: 25px; height: 25px; left: 35%; animation-duration: 15s; animation-delay: 7s; }
 .particle-8 { width: 45px; height: 45px; left: 80%; animation-duration: 24s; animation-delay: 6s; }
 
-/* SVG Leaf decorations keyframes */
 @keyframes sway {
   0%, 100% { transform: rotate(0deg); }
   50% { transform: rotate(4deg); }
@@ -94,4 +94,91 @@
 .sway-leaf {
   animation: sway 6s ease-in-out infinite;
   transform-origin: bottom center;
+}
+
+/* Liquid Glass Design System */
+.liquid-glass {
+  background: rgba(255,255,255,0.02);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: none;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.08);
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(180deg,
+    rgba(46,204,113,0.35) 0%,
+    rgba(46,204,113,0.12) 20%,
+    rgba(255,255,255,0) 40%,
+    rgba(255,255,255,0) 60%,
+    rgba(46,204,113,0.12) 80%,
+    rgba(46,204,113,0.35) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box,
+                linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.liquid-glass-strong {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
+  box-shadow: 4px 4px 4px rgba(0,0,0,0.08),
+              inset 0 1px 1px rgba(46,204,113,0.2);
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass-strong::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(180deg,
+    rgba(46,204,113,0.5) 0%,
+    rgba(46,204,113,0.2) 20%,
+    rgba(255,255,255,0) 40%,
+    rgba(255,255,255,0) 60%,
+    rgba(46,204,113,0.2) 80%,
+    rgba(46,204,113,0.5) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box,
+                linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.liquid-glass-card {
+  background: rgba(26,107,60,0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(46,204,113,0.15);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3),
+              inset 0 1px 0 rgba(46,204,113,0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Input style for liquid glass theme */
+.liquid-glass-input {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(46,204,113,0.2);
+  color: white;
+  border-radius: 12px;
+  transition: border-color 0.2s;
+}
+.liquid-glass-input:focus {
+  outline: none;
+  border-color: rgba(46,204,113,0.6);
+}
+.liquid-glass-input::placeholder {
+  color: rgba(255,255,255,0.3);
 }
