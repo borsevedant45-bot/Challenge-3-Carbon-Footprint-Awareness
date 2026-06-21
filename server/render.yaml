@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: ecopulse-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install && npx prisma generate
+    startCommand: node server.js
+    envVarGroups: []
+    healthCheckPath: /api/health
